@@ -23,6 +23,4 @@ COPY . .
 
 RUN python manage.py collectstatic --noinput 2>/dev/null || true
 
-EXPOSE 8080
-
-CMD sh -c "python manage.py migrate && python manage.py create_admin && gunicorn sms_project.wsgi:application --bind 0.0.0.0:${PORT:-8080} --workers 3 --timeout 120"
+CMD ["sh", "-c", "python manage.py migrate && python manage.py create_admin && exec gunicorn sms_project.wsgi:application --bind 0.0.0.0:${PORT:-8080} --workers 2 --timeout 120 --log-level debug --access-logfile - --error-logfile -"]
