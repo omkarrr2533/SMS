@@ -15,15 +15,15 @@ def parse_excel(file):
         headers = []
 
         for row_idx, row in enumerate(ws.iter_rows(values_only=True), 1):
-            if row_idx == 1:
+            if row_idx < 3:
+                continue  # Skip title and instructions rows
+            if row_idx == 3:
                 # Header row - map column names
                 headers = [str(cell).strip().lower() if cell else '' for cell in row]
                 continue
-
             # Skip empty rows
             if not any(row):
                 continue
-
             # Map row data to dict using headers
             row_data = {}
             for col_idx, value in enumerate(row):
