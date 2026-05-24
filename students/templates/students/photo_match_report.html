@@ -1,0 +1,64 @@
+{% extends 'layouts/base.html' %}
+{% block title %}Photo Match Report{% endblock %}
+{% block breadcrumb %}Files > {{ student_file.file_name }} > Photo Match{% endblock %}
+{% block content %}
+
+<div class="page-header">
+  <h1>Photo Match Report</h1>
+  <p>{{ student_file.file_name }}</p>
+</div>
+
+<div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-bottom: 20px;">
+  <div class="card" style="text-align: center;">
+    <div style="font-size: 32px; font-weight: 700; color: var(--success, #10b981);">{{ matched|length }}</div>
+    <div style="font-size: 13px; color: var(--text-secondary);">Matched</div>
+  </div>
+  <div class="card" style="text-align: center;">
+    <div style="font-size: 32px; font-weight: 700; color: var(--danger, #E05C5C);">{{ unmatched|length }}</div>
+    <div style="font-size: 13px; color: var(--text-secondary);">Unmatched</div>
+  </div>
+</div>
+
+{% if matched %}
+<div class="card" style="margin-bottom: 15px;">
+  <h3 style="font-size: 14px; color: var(--success, #10b981); margin-bottom: 10px;">Matched Photos</h3>
+  <table>
+    <thead><tr><th>File</th><th>Roll No</th><th>Student Name</th></tr></thead>
+    <tbody>
+      {% for m in matched %}
+      <tr>
+        <td>{{ m.filename }}</td>
+        <td>{{ m.roll_no }}</td>
+        <td>{{ m.student }}</td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+{% endif %}
+
+{% if unmatched %}
+<div class="card" style="margin-bottom: 15px; border-left: 4px solid var(--danger, #E05C5C);">
+  <h3 style="font-size: 14px; color: var(--danger, #E05C5C); margin-bottom: 10px;">Unmatched Photos (will be skipped)</h3>
+  <table>
+    <thead><tr><th>File</th><th>Attempted Roll No</th></tr></thead>
+    <tbody>
+      {% for u in unmatched %}
+      <tr><td>{{ u.filename }}</td><td>{{ u.roll_no }}</td></tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+{% endif %}
+
+<div style="display: flex; gap: 10px; margin-top: 20px;">
+  <a href="{% url 'bulk_photo_upload' file_id=student_file.pk %}" class="btn btn-secondary">Back</a>
+  {% if matched %}
+  <form method="post" action="{% url 'confirm_photo_upload' file_id=student_file.pk %}">
+    {% csrf_token %}
+    <button type="submit" class="btn btn-primary">Confirm & Save {{ matched|length }} Photos</button>
+  </form>
+  {% endif %}
+</div>
+
+{% endblock %}

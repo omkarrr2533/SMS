@@ -1,0 +1,109 @@
+{% extends 'layouts/base.html' %}
+{% block title %}Import Preview{% endblock %}
+{% block breadcrumb %}Upload > Preview{% endblock %}
+{% block content %}
+
+<div class="page-header">
+  <h1>Import Preview</h1>
+  <p>Review the data before importing</p>
+</div>
+
+<!-- Summary Cards -->
+<div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 15px; margin-bottom: 20px;">
+  <div class="card" style="text-align: center;">
+    <div style="font-size: 32px; font-weight: 700; color: var(--primary);">{{ total_valid }}</div>
+    <div style="font-size: 13px; color: var(--text-secondary);">Valid Students</div>
+  </div>
+  <div class="card" style="text-align: center;">
+    <div style="font-size: 32px; font-weight: 700; color: var(--danger, #E05C5C);">{{ total_errors }}</div>
+    <div style="font-size: 13px; color: var(--text-secondary);">Rows with Errors</div>
+  </div>
+  <div class="card" style="text-align: center;">
+    <div style="font-size: 32px; font-weight: 700; color: var(--text-primary);">{{ total_rows }}</div>
+    <div style="font-size: 13px; color: var(--text-secondary);">Total Rows</div>
+  </div>
+</div>
+
+<!-- Errors Section -->
+{% if errors %}
+<div class="card" style="margin-bottom: 20px; border-left: 4px solid var(--danger, #E05C5C);">
+  <h3 style="color: var(--danger, #E05C5C); margin-bottom: 10px;">Rows with Errors (will be skipped)</h3>
+  <table>
+    <thead>
+      <tr>
+        <th>Row</th>
+        <th>Errors</th>
+        <th>Data</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for err in errors %}
+      <tr style="background: rgba(224, 92, 92, 0.05);">
+        <td>{{ err.row }}</td>
+        <td>
+          {% for e in err.errors %}
+          <span class="badge badge-danger" style="margin: 2px;">{{ e }}</span>
+          {% endfor %}
+        </td>
+        <td style="font-size: 12px;">
+          {% for key, val in err.data.items %}
+          <strong>{{ key }}:</strong> {{ val }}{% if not forloop.last %}, {% endif %}
+          {% endfor %}
+        </td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+{% endif %}
+
+<!-- Preview Table -->
+<div class="card">
+  <h3 style="margin-bottom: 10px;">Preview (first {{ students_data|length }} of {{ total_valid }} valid rows)</h3>
+  <div style="overflow-x: auto;">
+    <table>
+      <thead>
+        <tr>
+          <th>Row</th>
+          <th>Roll No</th>
+          <th>PRN</th>
+          <th>Full Name</th>
+          <th>Phone</th>
+          <th>Email</th>
+          <th>Extra Fields</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for data in students_data %}
+        <tr>
+          <td>{{ data.row }}</td>
+          <td>{{ data.core.roll_no }}</td>
+          <td>{{ data.core.prn }}</td>
+          <td>{{ data.core.full_name }}</td>
+          <td>{{ data.core.phone|default:"-" }}</td>
+          <td>{{ data.core.email|default:"-" }}</td>
+          <td style="font-size: 12px;">
+            {% for key, val in data.extra.items %}
+            <span class="badge badge-info" style="margin: 2px;">{{ key }}: {{ val }}</span>
+            {% endfor %}
+            {% if not data.extra %}-{% endif %}
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<!-- Actions -->
+<div style="display: flex; gap: 10px; margin-top: 20px;">
+  <a href="{% url 'map_columns' %}" class="btn btn-secondary">Back to Mapping</a>
+  <form method="post" style="display: inline;">
+    {% csrf_token %}
+    <button type="submit" class="btn btn-primary" onclick="this.disabled=true; this.innerText='Importing...'; this.form.submit();">
+      Confirm Import ({{ total_valid }} students)
+    </button>
+  </form>
+</div>
+
+{% endblock %}

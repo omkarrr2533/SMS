@@ -1,0 +1,98 @@
+{% extends 'layouts/base.html' %}
+{% block title %}Map Columns{% endblock %}
+{% block breadcrumb %}Upload > Map Columns{% endblock %}
+{% block content %}
+
+<div class="page-header">
+  <h1>Map Excel Columns</h1>
+  <p>Map each Excel column to a system field, or store as extra data</p>
+</div>
+
+<div style="display: grid; grid-template-columns: 2fr 1fr; gap: 20px;">
+  <div class="card">
+    <form method="post">
+      {% csrf_token %}
+
+      {% if saved_mappings %}
+      <div style="margin-bottom: 20px; padding: 15px; background: var(--bg-secondary); border-radius: var(--radius-md);">
+        <label style="font-size: 12px; text-transform: uppercase; color: var(--text-secondary); letter-spacing: 0.5px;">Load Saved Mapping</label>
+        <div style="display: flex; gap: 10px; margin-top: 8px; flex-wrap: wrap;">
+          {% for m in saved_mappings %}
+          <button type="submit" name="load_mapping" value="{{ m.pk }}" class="btn btn-secondary btn-sm">
+            {{ m.name }} ({{ m.use_count }} uses)
+          </button>
+          {% endfor %}
+        </div>
+      </div>
+      {% endif %}
+
+      <table>
+        <thead>
+          <tr>
+            <th style="width: 30%">Excel Column</th>
+            <th style="width: 40%">Map To</th>
+            <th style="width: 30%">Preview Value</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for header in headers %}
+          <tr>
+            <td style="font-weight: 600;">{{ header }}</td>
+            <td>
+              <select name="map_{{ header }}" class="form-input" style="width: 100%;">
+                {% for value, label in field_choices %}
+                <option value="{{ value }}" {% if suggestions|default:'' %}{% for sh, sv in suggestions.items %}{% if sh == header and sv == value %}selected{% endif %}{% endfor %}{% endif %}>
+                  {{ label }}
+                </option>
+                {% endfor %}
+              </select>
+            </td>
+            <td style="font-size: 12px; color: var(--text-secondary);">
+              {% if preview_rows %}{{ preview_rows.0|default_if_none:"" }}{% endif %}
+            </td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+
+      <div style="margin-top: 20px; padding: 15px; background: var(--bg-secondary); border-radius: var(--radius-md);">
+        <label style="display: flex; align-items: center; gap: 8px; cursor: pointer;">
+          <input type="checkbox" id="saveMappingCheck" onchange="document.getElementById('saveMappingName').style.display = this.checked ? 'block' : 'none'">
+          <span style="font-size: 13px;">Save this mapping for future uploads</span>
+        </label>
+        <input type="text" name="save_mapping_name" id="saveMappingName" class="form-input" placeholder="Mapping name (e.g., CS Department Format)" style="display: none; margin-top: 10px;">
+      </div>
+
+      <div style="display: flex; gap: 10px; margin-top: 20px;">
+        <a href="{% url 'upload_excel' %}" class="btn btn-secondary">Back</a>
+        <button type="submit" class="btn btn-primary">Continue to Preview</button>
+      </div>
+    </form>
+  </div>
+
+  <div>
+    <div class="card">
+      <h3 style="font-size: 14px; color: var(--text-secondary); margin-bottom: 10px;">Upload Info</h3>
+      <table>
+        <tr><td style="font-weight: 600;">Class</td><td>{{ form_data.class_name }}</td></tr>
+        <tr><td style="font-weight: 600;">Division</td><td>{{ form_data.division }}</td></tr>
+        <tr><td style="font-weight: 600;">Year</td><td>{{ form_data.year }}</td></tr>
+        <tr><td style="font-weight: 600;">Academic Year</td><td>{{ form_data.academic_year }}</td></tr>
+        <tr><td style="font-weight: 600;">Columns Found</td><td>{{ headers|length }}</td></tr>
+      </table>
+    </div>
+
+    <div class="card" style="margin-top: 15px;">
+      <h3 style="font-size: 14px; color: var(--text-secondary); margin-bottom: 10px;">How it works</h3>
+      <ul style="font-size: 13px; color: var(--text-secondary); line-height: 1.8; padding-left: 18px;">
+        <li>Map each Excel column to a system field</li>
+        <li>Columns mapped to "Skip" will be ignored</li>
+        <li>"Store as extra field" saves data that doesn't fit standard fields</li>
+        <li>Auto-suggestions are based on column header matching</li>
+        <li>You can save mappings to reuse with similar files</li>
+      </ul>
+    </div>
+  </div>
+</div>
+
+{% endblock %}

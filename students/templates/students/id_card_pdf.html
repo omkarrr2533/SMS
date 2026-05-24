@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html>
+<head>
+<style>
+  @page { size: 85.6mm 53.98mm; margin: 0; }
+  body { font-family: Helvetica, Arial, sans-serif; margin: 0; padding: 0; }
+  .card {
+    width: 85.6mm; height: 53.98mm;
+    border: 1px solid #ccc; border-radius: 4mm;
+    padding: 4mm; box-sizing: border-box;
+    position: relative; overflow: hidden;
+    background: linear-gradient(135deg, #f0f4ff, #ffffff);
+  }
+  .header {
+    text-align: center; border-bottom: 0.5mm solid #5B6CF9;
+    padding-bottom: 2mm; margin-bottom: 2mm;
+  }
+  .header h1 { font-size: 8pt; color: #5B6CF9; margin: 0; }
+  .header p { font-size: 6pt; color: #666; margin: 1mm 0 0; }
+  .body { display: table; width: 100%; }
+  .photo-col { display: table-cell; width: 20mm; vertical-align: top; }
+  .info-col { display: table-cell; vertical-align: top; padding-left: 3mm; }
+  .photo-col img { width: 18mm; height: 22mm; object-fit: cover; border: 0.3mm solid #ddd; }
+  .photo-placeholder {
+    width: 18mm; height: 22mm; background: #5B6CF9;
+    color: white; font-size: 14pt; font-weight: bold;
+    text-align: center; line-height: 22mm;
+  }
+  .info-col .name { font-size: 9pt; font-weight: bold; color: #222; margin-bottom: 1mm; }
+  .info-col .detail { font-size: 6.5pt; color: #555; margin-bottom: 0.8mm; }
+  .info-col .detail strong { color: #333; }
+  .qr { position: absolute; bottom: 3mm; right: 3mm; }
+  .qr img { width: 14mm; height: 14mm; }
+</style>
+</head>
+<body>
+<div class="card">
+  <div class="header">
+    <h1>STUDENT IDENTITY CARD</h1>
+    <p>{{ student.class_name }} | {{ student.file.academic_year }}</p>
+  </div>
+  <div class="body">
+    <div class="photo-col">
+      {% if student.photo %}
+      <img src="{{ student.photo.path }}" alt="Photo" />
+      {% else %}
+      <div class="photo-placeholder">{{ student.initials }}</div>
+      {% endif %}
+    </div>
+    <div class="info-col">
+      <div class="name">{{ student.full_name }}</div>
+      <div class="detail"><strong>Roll No:</strong> {{ student.roll_no }}</div>
+      <div class="detail"><strong>PRN:</strong> {{ student.prn }}</div>
+      <div class="detail"><strong>Class:</strong> {{ student.class_name }}</div>
+      <div class="detail"><strong>Division:</strong> {{ student.division }}</div>
+      <div class="detail"><strong>Year:</strong> {{ student.year }}</div>
+      {% if student.phone %}<div class="detail"><strong>Phone:</strong> {{ student.phone }}</div>{% endif %}
+    </div>
+  </div>
+  {% if qr_base64 %}
+  <div class="qr">
+    <img src="data:image/png;base64,{{ qr_base64 }}" alt="QR" />
+  </div>
+  {% endif %}
+</div>
+</body>
+</html>

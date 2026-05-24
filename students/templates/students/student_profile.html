@@ -1,347 +1,157 @@
- {% extends 'layouts/base.html' %}
+{% extends 'layouts/base.html' %}
 {% block title %}{{ student.full_name }} - Profile{% endblock %}
 {% block breadcrumb %}Students > {{ student.full_name }}{% endblock %}
 {% block content %}
 
 <div class="page-header flex-between">
   <div>
-    <h1>👤 {{ student.full_name }}</h1>
+    <h1>{{ student.full_name }}</h1>
     <p>Student Profile</p>
   </div>
   <div>
-    <a href="{% url 'student_pdf' pk=student.pk %}" class="btn btn-success btn-sm">📄 Download PDF</a>
+    <a href="{% url 'student_pdf' pk=student.pk %}" class="btn btn-success btn-sm">Download PDF</a>
+    <a href="{% url 'student_id_card' pk=student.pk %}" class="btn btn-secondary btn-sm">ID Card</a>
     {% if request.user.role == 'admin' %}
-    <a href="{% url 'student_edit' pk=student.pk %}" class="btn btn-warning">✏️ Edit</a>
+    <a href="{% url 'student_edit' pk=student.pk %}" class="btn btn-warning">Edit</a>
     {% endif %}
-    <a href="{% url 'student_list' file_id=student.file_id %}" class="btn btn-secondary">← Back</a>
- {%extends 'layouts/base.html' %} {%block title %}{{student.full_name }} -
-Profile{%endblock %} {%block breadcrumb %}Students > {{student.full_name }}{%endblock %} {%block content %}
-<div class="page-header flex-between">
-  <div>
-    <h1>👤 {{student.full_name }}</h1>
-    <p>Student Profile</p>
+    <a href="{% url 'student_list' file_id=student.file_id %}" class="btn btn-secondary">Back</a>
   </div>
-  <div>
-    <a
-      href="{%url 'student_pdf' pk=student.pk %}"
-      class="btn btn-success btn-sm">📄 Download PDF</a>
-    {%if request.user.role == 'admin' %}
-    <a href="{%url 'student_edit' pk=student.pk %}" class="btn btn-warning">✏️ Edit</a>
-    {%endif %}
-    <a
-      href="{%url 'student_list' file_id=student.file_id %}"
-      class="btn btn-secondary">← Back</a>
-   </div>
 </div>
 
-<div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px">
+<div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
+  <!-- Left: Photo + Identity Card -->
   <div class="card">
-    <div style="text-align: center; margin-bottom: 20px">
-       {% if student.photo %}
+    <div style="text-align: center; margin-bottom: 20px;">
+      {% if student.photo %}
       <img src="{{ student.photo.url }}" alt="Photo" style="width: 100px; height: 100px; border-radius: 50%; object-fit: cover;" />
       {% else %}
-      <div style="width: 80px; height: 80px; border-radius: 50%; background: #06b6d4; color: #fff; display: inline-flex; align-items: center; justify-content: center; font-size: 28px; font-weight: 700; margin: 0 auto;">
+      <div style="width: 80px; height: 80px; border-radius: 50%; background: var(--primary); color: #fff; display: inline-flex; align-items: center; justify-content: center; font-size: 28px; font-weight: 700; margin: 0 auto;">
         {{ student.initials }}
       </div>
       {% endif %}
-      <h2 style="margin-top: 10px">{{ student.full_name }}</h2>
-      <p style="color: #64748b">
+      <h2 style="margin-top: 10px;">{{ student.full_name }}</h2>
+      <p style="color: var(--text-secondary);">
         {{ student.class_name }} | Div {{ student.division }} | Roll {{ student.roll_no }}
       </p>
       {% if student.status == 'normal' %}
-      <span class="badge badge-success">✅ Normal</span>
+      <span class="badge badge-success">Normal</span>
       {% elif student.status == 'marked' %}
-      <span class="badge badge-warning">🚩 Edit Marked</span>
+      <span class="badge badge-warning">Edit Marked</span>
       {% elif student.status == 'resolved' %}
-      <span class="badge badge-info">✅ Resolved</span>
+      <span class="badge badge-info">Resolved</span>
       {% endif %}
     </div>
 
-    <h3 style="font-size: 14px; color: #64748b; margin: 15px 0 10px">📋 Personal Information</h3>
+    <!-- Dynamic Field Sections -->
+    {% for section_name, fields in field_sections.items %}
+    <h3 style="font-size: 14px; color: var(--text-secondary); margin: 20px 0 10px;">{{ section_name }}</h3>
     <table>
+      {% for field in fields %}
       <tr>
-        <td style="font-weight: 600; width: 130px">Full Name</td>
-        <td>{{ student.full_name }}</td>
+        <td style="font-weight: 600; width: 150px;">{{ field.label }}</td>
+        <td>{{ field.value|default:"Not provided" }}</td>
       </tr>
-      <tr>
-        <td style="font-weight: 600">Phone</td>
-        <td>{{ student.phone|default:"Not provided" }}</td>
-      </tr>
-      <tr>
-        <td style="font-weight: 600">Email</td>
-        <td>{{ student.email|default:"Not provided" }}</td>
-      </tr>
-      <tr>
-        <td style="font-weight: 600">Birthdate</td>
-        <td>{{ student.birthdate|date:"d M Y"|default:"Not provided" }}</td>
-      </tr>
-      <tr>
-        <td style="font-weight: 600">Gender</td>
-        <td>{{ student.get_gender_display|default:"Not provided" }}</td>
-      </tr>
-      <tr>
-        <td style="font-weight: 600">Local Address</td>
-        <td>{{ student.address|default:"Not provided" }}</td>
-      </tr>
-      <tr>
-        <td style="font-weight: 600">Permanent Address</td>
-        <td>{{ student.permanent_address|default:"Not provided" }}</td>
-       {%if student.photo %}
-      <img
-        src="{{student.photo.url }}"
-        alt="Photo"
-        style="
-          width: 100px;
-          height: 100px;
-          border-radius: 50%;
-          object-fit: cover;
-        "
-      />
-      {%else %}
-      <div
-        style="
-          width: 80px;
-          height: 80px;
-          border-radius: 50%;
-          background: #06b6d4;
-          color: #fff;
-          display: inline-flex;
-          align-items: center;
-          justify-content: center;
-          font-size: 28px;
-          font-weight: 700;
-          margin: 0 auto;
-        ">
-        {{student.initials }}
-      </div>
-      {%endif %}
-      <h2 style="margin-top: 10px">{{student.full_name }}</h2>
-      <p style="color: #64748b">
-        {{student.class_name }} | Div {{student.division }} | Roll {{student.roll_no }}
-      </p>
-      {%if student.status == 'normal' %}
-      <span class="badge badge-success">✅ Normal</span>
-      {%elif student.status == 'marked' %}
-      <span class="badge badge-warning">🚩 Edit Marked</span>
-      {%elif student.status == 'resolved' %}
-      <span class="badge badge-info">✅ Resolved</span>
-      {%endif %}
-    </div>
-
-    <h3 style="font-size: 14px; color: #64748b; margin: 15px 0 10px">
-      📋 Personal Information
-    </h3>
-    <table>
-      <tr>
-        <td style="font-weight: 600; width: 130px">Full Name</td>
-        <td>{{student.full_name }}</td>
-      </tr>
-      <tr>
-        <td style="font-weight: 600">Phone</td>
-        <td>{{student.phone|default:"Not provided" }}</td>
-      </tr>
-      <tr>
-        <td style="font-weight: 600">Email</td>
-        <td>{{student.email|default:"Not provided" }}</td>
-      </tr>
-      <tr>
-        <td style="font-weight: 600">Address</td>
-        <td>{{student.address|default:"Not provided" }}</td>
-       </tr>
+      {% endfor %}
     </table>
+    {% endfor %}
   </div>
 
+  <!-- Right: File Info + Edit History -->
   <div>
     <div class="card">
-       <h3 style="font-size: 14px; color: #64748b; margin-bottom: 10px">👨‍👩‍👦 Parent / Guardian Information</h3>
+      <h3 style="font-size: 14px; color: var(--text-secondary); margin-bottom: 10px;">File Information</h3>
       <table>
         <tr>
-          <td style="font-weight: 600; width: 130px">Parent Phone</td>
-          <td>{{ student.parent_phone|default:"Not provided" }}</td>
- 
-      <h3 style="font-size: 14px; color: #64748b; margin-bottom: 10px">
-        👨‍👩‍👦 Parent / Guardian Information
-      </h3>
-      <table>
-        <tr>
-          <td style="font-weight: 600; width: 130px">Parent Name</td>
-          <td>{{student.parent_name|default:"Not provided" }}</td>
-        </tr>
-        <tr>
-          <td style="font-weight: 600">Parent Phone</td>
-          <td>{{student.parent_phone|default:"Not provided" }}</td>
-         </tr>
-      </table>
-    </div>
-
-    <div class="card">
-       <h3 style="font-size: 14px; color: #64748b; margin-bottom: 10px">🎓 Academic Information</h3>
-      <table>
-        <tr>
-          <td style="font-weight: 600; width: 130px">Class</td>
-          <td>{{ student.class_name }}</td>
-        </tr>
-        <tr>
-          <td style="font-weight: 600">Division</td>
-          <td>{{ student.division }}</td>
-        </tr>
-        <tr>
-          <td style="font-weight: 600">Year</td>
-          <td>{{ student.year }}</td>
-        </tr>
-        <tr>
-          <td style="font-weight: 600">Roll Number</td>
-          <td>{{ student.roll_no }}</td>
-        </tr>
-        <tr>
-          <td style="font-weight: 600">PRN</td>
-          <td>{{ student.prn }}</td>
-        </tr>
-        <tr>
-          <td style="font-weight: 600">ABC ID</td>
-          <td>{{ student.abc_id|default:"Not provided" }}</td>
- 
-      <h3 style="font-size: 14px; color: #64748b; margin-bottom: 10px">
-        🎓 Academic Information
-      </h3>
-      <table>
-        <tr>
-          <td style="font-weight: 600; width: 130px">Class</td>
-          <td>{{student.class_name }}</td>
-        </tr>
-        <tr>
-          <td style="font-weight: 600">Division</td>
-          <td>{{student.division }}</td>
-        </tr>
-        <tr>
-          <td style="font-weight: 600">Year</td>
-          <td>{{student.year }}</td>
-        </tr>
-        <tr>
-          <td style="font-weight: 600">Roll Number</td>
-          <td>{{student.roll_no }}</td>
-        </tr>
-        <tr>
-          <td style="font-weight: 600">PRN</td>
-          <td>{{student.prn }}</td>
-         </tr>
-      </table>
-    </div>
-
-    <div class="card">
-       <h3 style="font-size: 14px; color: #64748b; margin-bottom: 10px">📁 File Information</h3>
-      <table>
-        <tr>
-          <td style="font-weight: 600; width: 130px">Source File</td>
+          <td style="font-weight: 600; width: 130px;">Source File</td>
           <td>{{ student.file.file_name }}</td>
         </tr>
         <tr>
-          <td style="font-weight: 600">Academic Year</td>
+          <td style="font-weight: 600;">Academic Year</td>
           <td>{{ student.file.academic_year }}</td>
         </tr>
         <tr>
-          <td style="font-weight: 600">Upload Date</td>
+          <td style="font-weight: 600;">Upload Date</td>
           <td>{{ student.file.upload_date|date:"d M Y" }}</td>
         </tr>
         <tr>
-          <td style="font-weight: 600">Last Modified</td>
+          <td style="font-weight: 600;">Last Modified</td>
           <td>{{ student.updated_at|date:"d M Y, h:i A" }}</td>
         </tr>
         <tr>
-          <td style="font-weight: 600">Status</td>
+          <td style="font-weight: 600;">Status</td>
           <td>{{ student.get_status_display }}</td>
-       <h3 style="font-size: 14px; color: #64748b; margin-bottom: 10px">
-        📁 File Information
-      </h3>
-      <table>
-        <tr>
-          <td style="font-weight: 600; width: 130px">Source File</td>
-          <td>{{student.file.file_name }}</td>
         </tr>
-        <tr>
-          <td style="font-weight: 600">Academic Year</td>
-          <td>{{student.file.academic_year }}</td>
-        </tr>
-        <tr>
-          <td style="font-weight: 600">Upload Date</td>
-          <td>{{student.file.upload_date|date:"d M Y" }}</td>
-        </tr>
-        <tr>
-          <td style="font-weight: 600">Last Modified</td>
-          <td>{{student.updated_at|date:"d M Y, h:i A" }}</td>
-        </tr>
-        <tr>
-          <td style="font-weight: 600">Status</td>
-          <td>{{student.get_status_display }}</td>
-         </tr>
       </table>
     </div>
-  </div>
-</div>
 
-<!-- Edit History for this student -->
- {% if request.user.role == 'admin' %}
-{% with notifications=student.notifications.all %}
-{% if notifications %}
- 
-{%if request.user.role == 'admin' %} {%with notifications=student.notifications.all %} {%if notifications %}
- <div class="card" style="margin-top: 10px">
-  <div class="card-header">
-    <h3>📋 Edit Request History</h3>
+    <!-- Edit History Timeline -->
+    {% if edit_logs %}
+    <div class="card" style="margin-top: 15px;">
+      <h3 style="font-size: 14px; color: var(--text-secondary); margin-bottom: 15px;">Edit History</h3>
+      <div style="position: relative; padding-left: 20px;">
+        <div style="position: absolute; left: 6px; top: 0; bottom: 0; width: 2px; background: var(--border-primary, #e2e8f0);"></div>
+        {% for log in edit_logs %}
+        <div style="position: relative; margin-bottom: 16px; padding-left: 15px;">
+          <div style="position: absolute; left: -17px; top: 4px; width: 10px; height: 10px; border-radius: 50%; background: {% if log.is_reverted %}var(--warning, #f59e0b){% else %}var(--primary){% endif %};"></div>
+          <div style="font-size: 13px;">
+            <strong>{{ log.field_label }}</strong>
+            {% if log.is_reverted %}<span class="badge badge-warning" style="font-size: 10px;">reverted</span>{% endif %}
+          </div>
+          <div style="font-size: 12px; color: var(--text-secondary); margin-top: 2px;">
+            <span style="text-decoration: line-through; color: var(--danger, #E05C5C);">{{ log.old_value|truncatechars:50|default:"(empty)" }}</span>
+            &rarr;
+            <span style="color: var(--success, #10b981);">{{ log.new_value|truncatechars:50|default:"(empty)" }}</span>
+          </div>
+          <div style="font-size: 11px; color: var(--text-muted, #7A7F9A); margin-top: 3px;">
+            {{ log.changed_by.full_name|default:"System" }} &middot; {{ log.timestamp|date:"d M Y, h:i A" }}
+            {% if request.user.role == 'admin' and not log.is_reverted %}
+            <form method="post" action="{% url 'revert_edit' pk=student.pk log_id=log.pk %}" style="display: inline;">
+              {% csrf_token %}
+              <button type="submit" class="btn btn-sm" style="font-size: 10px; padding: 2px 8px; margin-left: 5px;" onclick="return confirm('Revert this change?')">Undo</button>
+            </form>
+            {% endif %}
+          </div>
+        </div>
+        {% endfor %}
+      </div>
+    </div>
+    {% endif %}
+
+    <!-- Edit Request History -->
+    {% if request.user.role == 'admin' %}
+    {% with notifications=student.notifications.all %}
+    {% if notifications %}
+    <div class="card" style="margin-top: 15px;">
+      <h3 style="font-size: 14px; color: var(--text-secondary); margin-bottom: 10px;">Edit Requests</h3>
+      <table>
+        <thead>
+          <tr>
+            <th>Date</th>
+            <th>By</th>
+            <th>Field</th>
+            <th>Status</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for notif in notifications %}
+          <tr>
+            <td style="font-size: 12px;">{{ notif.created_at|date:"d M Y" }}</td>
+            <td>{{ notif.requested_by.full_name }}</td>
+            <td>{{ notif.get_field_to_edit_display }}</td>
+            <td>
+              <span class="badge {% if notif.status == 'pending' %}badge-warning{% elif notif.status == 'resolved' %}badge-success{% else %}badge-gray{% endif %}">
+                {{ notif.get_status_display }}
+              </span>
+            </td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+    {% endif %}
+    {% endwith %}
+    {% endif %}
   </div>
-  <table>
-    <thead>
-      <tr>
-        <th>Date</th>
-        <th>Requested By</th>
-        <th>Field</th>
-        <th>Remark</th>
-        <th>Status</th>
-      </tr>
-    </thead>
-    <tbody>
-       {% for notif in notifications %}
-      <tr>
-        <td style="font-size: 12px">{{ notif.created_at|date:"d M Y, h:i A" }}</td>
-        <td>{{ notif.requested_by.full_name }} ({{ notif.requested_by.get_role_display }})</td>
-        <td>{{ notif.get_field_to_edit_display }}</td>
-        <td style="font-size: 13px">{{ notif.remark }}</td>
-        <td>
-          <span class="badge {% if notif.status == 'pending' %}badge-warning{% elif notif.status == 'resolved' %}badge-success{% else %}badge-gray{% endif %}">
-            {{ notif.get_status_display }}
-          </span>
-        </td>
-      </tr>
-      {% endfor %}
-    </tbody>
-  </table>
 </div>
-{% endif %}
-{% endwith %}
-{% endif %}
 
 {% endblock %}
- 
-      {%for notif in notifications %}
-      <tr>
-        <td style="font-size: 12px">
-          {{notif.created_at|date:"d M Y, h:i A" }}
-        </td>
-        <td>
-          {{notif.requested_by.full_name }} ({{notif.requested_by.get_role_display }})
-        </td>
-        <td>{{notif.get_field_to_edit_display }}</td>
-        <td style="font-size: 13px">{{notif.remark }}</td>
-        <td>
-          <span
-            class="badge {%if notif.status == 'pending' %}badge-warning{%elif notif.status == 'resolved' %}badge-success{%else %}badge-gray{%endif %}">
-            {{notif.get_status_display }}
-          </span>
-        </td>
-      </tr>
-      {%endfor %}
-    </tbody>
-  </table>
-</div>
-{%endif %} {%endwith %} {%endif %} {%endblock %}
- 

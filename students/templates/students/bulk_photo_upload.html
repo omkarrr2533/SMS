@@ -1,0 +1,41 @@
+{% extends 'layouts/base.html' %}
+{% block title %}Upload Photos - {{ student_file.file_name }}{% endblock %}
+{% block breadcrumb %}Files > {{ student_file.file_name }} > Upload Photos{% endblock %}
+{% block content %}
+
+<div class="page-header flex-between">
+  <div>
+    <h1>Bulk Photo Upload</h1>
+    <p>{{ student_file.file_name }}</p>
+  </div>
+  <div>
+    <a href="{% url 'student_list' file_id=student_file.pk %}" class="btn btn-secondary">Back</a>
+  </div>
+</div>
+
+<div style="display: grid; grid-template-columns: 2fr 1fr; gap: 20px;">
+  <div class="card">
+    <form method="post" enctype="multipart/form-data">
+      {% csrf_token %}
+      <div class="upload-zone" style="border: 2px dashed var(--border-primary, #e2e8f0); border-radius: var(--radius-md); padding: 40px; text-align: center; cursor: pointer;">
+        <i class="ti ti-photo-up" style="font-size: 48px; color: var(--text-secondary);"></i>
+        <p style="margin-top: 10px; color: var(--text-secondary);">Drop your ZIP file here or click to browse</p>
+        <input type="file" name="photo_zip" accept=".zip" required style="margin-top: 15px;">
+      </div>
+      <button type="submit" class="btn btn-primary" style="margin-top: 15px;">Upload & Match</button>
+    </form>
+  </div>
+
+  <div class="card">
+    <h3 style="font-size: 14px; color: var(--text-secondary); margin-bottom: 10px;">Instructions</h3>
+    <ul style="font-size: 13px; color: var(--text-secondary); line-height: 1.8; padding-left: 18px;">
+      <li>Upload a <strong>.zip</strong> file containing student photos</li>
+      <li>Name each photo by <strong>roll number</strong> (e.g., <code>001.jpg</code>, <code>045.png</code>)</li>
+      <li>Supported formats: JPG, JPEG, PNG, GIF, WEBP</li>
+      <li>Photos will be matched to students by roll number</li>
+      <li>You'll see a match report before confirming</li>
+    </ul>
+  </div>
+</div>
+
+{% endblock %}

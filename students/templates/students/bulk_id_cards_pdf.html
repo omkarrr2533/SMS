@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html>
+<head>
+<style>
+  @page { size: A4; margin: 10mm; }
+  body { font-family: Helvetica, Arial, sans-serif; margin: 0; padding: 0; }
+  .page-grid { display: block; }
+  .card {
+    width: 85mm; height: 54mm;
+    border: 0.5mm solid #ccc; border-radius: 3mm;
+    padding: 3mm; box-sizing: border-box;
+    display: inline-block; vertical-align: top;
+    margin: 3mm;
+    position: relative; overflow: hidden;
+    background: linear-gradient(135deg, #f0f4ff, #ffffff);
+    page-break-inside: avoid;
+  }
+  .header { text-align: center; border-bottom: 0.3mm solid #5B6CF9; padding-bottom: 1.5mm; margin-bottom: 1.5mm; }
+  .header h1 { font-size: 7pt; color: #5B6CF9; margin: 0; }
+  .header p { font-size: 5.5pt; color: #666; margin: 0.5mm 0 0; }
+  .body { display: table; width: 100%; }
+  .photo-col { display: table-cell; width: 16mm; vertical-align: top; }
+  .info-col { display: table-cell; vertical-align: top; padding-left: 2mm; }
+  .photo-placeholder { width: 15mm; height: 18mm; background: #5B6CF9; color: white; font-size: 12pt; font-weight: bold; text-align: center; line-height: 18mm; }
+  .photo-col img { width: 15mm; height: 18mm; object-fit: cover; border: 0.2mm solid #ddd; }
+  .name { font-size: 8pt; font-weight: bold; color: #222; margin-bottom: 0.8mm; }
+  .detail { font-size: 6pt; color: #555; margin-bottom: 0.5mm; }
+  .detail strong { color: #333; }
+  .qr { position: absolute; bottom: 2mm; right: 2mm; }
+  .qr img { width: 12mm; height: 12mm; }
+</style>
+</head>
+<body>
+<div class="page-grid">
+  {% for item in student_cards %}
+  <div class="card">
+    <div class="header">
+      <h1>STUDENT ID CARD</h1>
+      <p>{{ item.student.class_name }} | {{ student_file.academic_year }}</p>
+    </div>
+    <div class="body">
+      <div class="photo-col">
+        {% if item.student.photo %}
+        <img src="{{ item.student.photo.path }}" alt="Photo" />
+        {% else %}
+        <div class="photo-placeholder">{{ item.student.initials }}</div>
+        {% endif %}
+      </div>
+      <div class="info-col">
+        <div class="name">{{ item.student.full_name }}</div>
+        <div class="detail"><strong>Roll:</strong> {{ item.student.roll_no }}</div>
+        <div class="detail"><strong>PRN:</strong> {{ item.student.prn }}</div>
+        <div class="detail"><strong>Div:</strong> {{ item.student.division }}</div>
+        <div class="detail"><strong>Year:</strong> {{ item.student.year }}</div>
+      </div>
+    </div>
+    {% if item.qr_base64 %}
+    <div class="qr"><img src="data:image/png;base64,{{ item.qr_base64 }}" alt="QR" /></div>
+    {% endif %}
+  </div>
+  {% endfor %}
+</div>
+</body>
+</html>
