@@ -1,0 +1,114 @@
+{% extends 'layouts/base.html' %}
+{% block title %}Search: {{ query }}{% endblock %}
+{% block breadcrumb %}Search{% endblock %}
+{% block content %}
+
+<div class="page-header">
+  <h1>Search Results</h1>
+  <p>{% if query %}Results for "{{ query }}"{% else %}Enter a search term{% endif %}</p>
+</div>
+
+<form method="get" style="margin-bottom: 20px;">
+  <div style="display: flex; gap: 10px;">
+    <input type="text" name="q" value="{{ query }}" class="form-input" placeholder="Search students, files, staff, announcements..." style="flex: 1;" autofocus>
+    <button type="submit" class="btn btn-primary">Search</button>
+  </div>
+</form>
+
+{% if query %}
+  <!-- Students -->
+  {% if results.students %}
+  <div class="card" style="margin-bottom: 15px;">
+    <h3 style="font-size: 14px; color: var(--text-secondary); margin-bottom: 10px;">Students ({{ results.students|length }})</h3>
+    <table>
+      <thead>
+        <tr><th>Roll No</th><th>Name</th><th>PRN</th><th>Class</th><th>Action</th></tr>
+      </thead>
+      <tbody>
+        {% for s in results.students %}
+        <tr>
+          <td>{{ s.roll_no }}</td>
+          <td>{{ s.full_name }}</td>
+          <td>{{ s.prn }}</td>
+          <td>{{ s.class_name }} - {{ s.division }}</td>
+          <td><a href="{% url 'student_profile' pk=s.pk %}" class="btn btn-primary btn-sm">View</a></td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+  {% endif %}
+
+  <!-- Files -->
+  {% if results.files %}
+  <div class="card" style="margin-bottom: 15px;">
+    <h3 style="font-size: 14px; color: var(--text-secondary); margin-bottom: 10px;">Files ({{ results.files|length }})</h3>
+    <table>
+      <thead>
+        <tr><th>File Name</th><th>Class</th><th>Students</th><th>Action</th></tr>
+      </thead>
+      <tbody>
+        {% for f in results.files %}
+        <tr>
+          <td>{{ f.file_name }}</td>
+          <td>{{ f.class_name }} - {{ f.division }}</td>
+          <td><span class="badge badge-info">{{ f.total_students }}</span></td>
+          <td><a href="{% url 'student_list' file_id=f.pk %}" class="btn btn-primary btn-sm">View</a></td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+  {% endif %}
+
+  <!-- Staff -->
+  {% if results.staff %}
+  <div class="card" style="margin-bottom: 15px;">
+    <h3 style="font-size: 14px; color: var(--text-secondary); margin-bottom: 10px;">Staff ({{ results.staff|length }})</h3>
+    <table>
+      <thead>
+        <tr><th>Name</th><th>Role</th><th>Email</th></tr>
+      </thead>
+      <tbody>
+        {% for u in results.staff %}
+        <tr>
+          <td>{{ u.full_name }}</td>
+          <td><span class="badge badge-info">{{ u.get_role_display }}</span></td>
+          <td>{{ u.email }}</td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+  {% endif %}
+
+  <!-- Announcements -->
+  {% if results.announcements %}
+  <div class="card" style="margin-bottom: 15px;">
+    <h3 style="font-size: 14px; color: var(--text-secondary); margin-bottom: 10px;">Announcements ({{ results.announcements|length }})</h3>
+    <table>
+      <thead>
+        <tr><th>Title</th><th>Category</th><th>Date</th><th>Action</th></tr>
+      </thead>
+      <tbody>
+        {% for a in results.announcements %}
+        <tr>
+          <td>{{ a.title }}</td>
+          <td><span class="badge badge-info">{{ a.get_category_display }}</span></td>
+          <td>{{ a.created_at|date:"d M Y" }}</td>
+          <td><a href="{% url 'announcement_detail' pk=a.pk %}" class="btn btn-primary btn-sm">View</a></td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+  {% endif %}
+
+  {% if not results.students and not results.files and not results.staff and not results.announcements %}
+  <div class="card" style="text-align: center; padding: 40px;">
+    <p style="color: var(--text-secondary);">No results found for "{{ query }}"</p>
+  </div>
+  {% endif %}
+{% endif %}
+
+{% endblock %}

@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html>
+<head>
+<style>
+  @page { size: A4 landscape; margin: 15mm; }
+  body { font-family: Helvetica, Arial, sans-serif; font-size: 9pt; color: #333; }
+  h1 { font-size: 14pt; color: #5B6CF9; margin-bottom: 5mm; }
+  table { width: 100%; border-collapse: collapse; margin-top: 5mm; }
+  th { background: #5B6CF9; color: white; padding: 3mm 2mm; text-align: left; font-size: 8pt; }
+  td { padding: 2mm; border-bottom: 0.2mm solid #eee; font-size: 8pt; }
+  tr:nth-child(even) { background: #f8fafc; }
+  .footer { margin-top: 10mm; font-size: 7pt; color: #999; text-align: right; }
+</style>
+</head>
+<body>
+  <h1>{{ file_name }}</h1>
+  <table>
+    <thead>
+      <tr>
+        {% for h in headers %}
+        <th>{{ h }}</th>
+        {% endfor %}
+      </tr>
+    </thead>
+    <tbody>
+      {% for row in rows %}
+      <tr>
+        {% for cell in row %}
+        <td>{{ cell|default:"-" }}</td>
+        {% endfor %}
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+  <div class="footer">Generated on {% now "d M Y, h:i A" %}</div>
+</body>
+</html>
